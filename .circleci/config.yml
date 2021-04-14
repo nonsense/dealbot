@@ -1,0 +1,33 @@
+version: 2.1
+
+executors:
+  golang:
+    docker:
+      - image: circleci/golang:1.15.5
+    resource_class: 2xlarge
+
+commands:
+  install-lotus:
+    steps:
+      - run:
+          name: install lotus
+          command: |
+            sudo apt-get update
+            sudo apt-get install ocl-icd-opencl-dev libhwloc-dev
+            git submodule sync
+            git submodule update --init
+            git clone https://github.com/filecoin-project/lotus.git
+            cd lotus
+            make debug
+
+jobs:
+  build-and-test:
+    executor: golang
+    steps:
+      - install-lotus
+
+workflows:
+  version: 2.1
+  ci:
+    jobs:
+      - build-and-test
